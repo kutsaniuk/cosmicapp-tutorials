@@ -2,6 +2,8 @@ const bodyParser = require('body-parser')
 const session = require('express-session')
 
 module.exports = {
+
+  dev: (process.env.NODE_ENV !== 'production'),
   /*
   ** Headers of the page
   */
