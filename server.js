@@ -8,7 +8,7 @@ var http = require('http').Server(app)
 let config = require('./nuxt.config.js')
 const nuxt = new Nuxt(config)
 app.use(nuxt.render)
-app.use(express.static(__dirname))
+// app.use(express.static(__dirname))
 app.set('port', process.env.PORT || 3000)
 
 // Build only in dev mode
