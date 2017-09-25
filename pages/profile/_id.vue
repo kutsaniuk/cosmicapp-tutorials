@@ -22,7 +22,7 @@
             <br>
             <br>
             <section v-if="$store.state.authUser">
-                <nuxt-link class="button" to="/add">Add tutorial</nuxt-link>
+                <nuxt-link v-if="$store.state.authUser.user[0].value === username" class="button" to="/add">Add tutorial</nuxt-link>
             </section>
         </div>
     </div>

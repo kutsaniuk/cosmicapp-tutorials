@@ -4,9 +4,6 @@ const session = require('express-session')
 module.exports = {
 
   dev: (process.env.NODE_ENV !== 'production'),
-  /*
-  ** Headers of the page
-  */
   head: {
     title: 'cosmicapp-tutorials',
     meta: [
@@ -18,42 +15,18 @@ module.exports = {
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ]
   },
-  /*
-  ** Customize the progress bar color
-  */
   loading: { color: '#585858' },
-
-  /*
-  ** Build configuration
-  */
   build: {
-    /*
-    ** Run ESLint on save
-    */
-    // extend (config, ctx) {
-    //   if (ctx.dev && ctx.isClient) {
-    //     config.module.rules.push({
-    //       enforce: 'pre',
-    //       test: /\.(js|vue)$/,
-    //       loader: 'eslint-loader',
-    //       exclude: /(node_modules)/
-    //     }) 
-    //   }
-    // },
     vendor: ['axios', 'vue-notification']
   },
   serverMiddleware: [
-    // body-parser middleware
     bodyParser.json(),
-    // session middleware
     session({
       secret: 'super-secret-key',
       resave: true,
       saveUninitialized: false,
       cookie: { maxAge: 60000 }
     }),
-    // Api middleware
-    // We add /api/login & /api/logout routes
     '~/api'
   ],
   env: {

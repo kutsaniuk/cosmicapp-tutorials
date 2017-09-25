@@ -1,4 +1,5 @@
-import axios from 'axios'
+import axios from 'axios';
+var sha1 = require('sha1');
 
 export const state = () => ({
     authUser: null
@@ -31,7 +32,7 @@ export const actions = {
                     axios.get('https://api.cosmicjs.com/v1/' + process.env.bucketSlug + '/object-type/users/search', {
                             params: {
                                 metafield_key: 'password',
-                                metafield_value: password,
+                                metafield_value: sha1(password),
                                 limit: 1,
                                 read_key: process.env.readKey
                             }
@@ -65,12 +66,12 @@ export const actions = {
                     {
                         key: "password",
                         type: "text",
-                        value: password
+                        value: sha1(password)
                     }
                 ]
             })
             .then(function (response) {
-                axios.post('/api/saveSession', response.data.objects[0])
+                axios.post('/api/saveSession', response.data.object)
                     .then(function (response) {
                         commit('SET_USER', response.data);
                         window.location.href = '/profile/' + username;

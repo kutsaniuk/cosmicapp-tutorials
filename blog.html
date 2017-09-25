@@ -1,0 +1,402 @@
+<html>
+    <head>
+        <title>Blog</title>
+    </head>
+    <body>
+    <div id="main">
+        <div class="inner">
+            <h2>
+                How to Build an Tutorials App Using Nuxt.Js
+            </h2>
+            <hr>
+            <img src="for-blog.png" class="img-responsive">
+            <br>
+            <p>
+                In this tutorial I'm going to show you how to create a "Tutorials Portfolio" app using a Nuxt.js, and Cosmic JS. For the sake of understanding how to consume Restful API’s, this tutorial will show how to make simple AJAX requests to the Cosmic JS API in order to retrieve, update, and delete data in our Cosmic JS buckets. Let's get started.
+            </p>
+            <h2>TL;DR</h2>
+            <p>
+                <a href="https://github.com/kutsaniuk/cosmicapp-tutorials">Download the GitHub repo.</a><br>
+                <a href="http://tutorials.cosmicapp.co">Check out the demo.</a>
+            </p>
+            <h2>Getting Started:</h2>
+            <p>
+                First, let’s make a new directory to build our project in and lets also make a package.json file.
+            </p>
+            <code>mkdir cosmicapp-tutorials</code><br>
+            <code>cosmicapp-tutorials$ touch package.json</code>
+            <p>
+                Now, in your package.json, copy and paste the code below:
+            </p>
+<pre>
+    <code>
+        {
+        "name": "cosmicapp-tutorials",
+        "version": "1.0.0",
+        "description": "Nuxt.js project",
+        "author": "kutsaniuk@gmail.com",
+        "private": true,
+        "scripts": {
+        "dev": "NODE_ENV=development nuxt",
+        "build": "nuxt build",
+        "start": "npm run build; NODE_ENV=production HOST=0.0.0.0 nuxt start"
+        },
+        "dependencies": {
+        "axios": "^0.16.2",
+        "body-parser": "^1.17.2",
+        "cross-env": "^5.0.5",
+        "express": "^4.15.3",
+        "express-session": "^1.15.3",
+        "http": "0.0.0",
+        "nuxt": "^1.0.0-rc11",
+        "sha1": "^1.1.1",
+        "vue-notification": "^1.3.4"
+        },
+        "devDependencies": {
+        "babel-eslint": "^7.2.3",
+        "eslint": "^4.3.0",
+        "eslint-config-standard": "^10.2.1",
+        "eslint-loader": "^1.9.0",
+        "eslint-plugin-html": "^3.1.1",
+        "eslint-plugin-import": "^2.7.0",
+        "eslint-plugin-node": "^5.1.1",
+        "eslint-plugin-promise": "^3.5.0",
+        "eslint-plugin-standard": "^3.0.1"
+        }
+        }
+    </code>
+</pre>
+            <p>
+                Second, let’s make a nuxt.config.js file.
+            </p>
+            <code>cosmicapp-tutorials$ touch nuxt.config.js</code>
+            <p>
+                Now, in your nuxt.config.js, copy and paste the code below:
+            </p>
+<pre>
+    <code>
+        //cosmicapp-tutorials/nuxt.config.js
+        const bodyParser = require('body-parser')
+        const session = require('express-session')
+
+        module.exports = {
+
+        dev: (process.env.NODE_ENV !== 'production'),
+        head: {
+        title: 'cosmicapp-tutorials',
+        meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { hid: 'description', name: 'description', content: 'Nuxt.js project' }
+        ],
+        link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+        ]
+        },
+        loading: { color: '#585858' },
+        build: {
+        vendor: ['axios', 'vue-notification']
+        },
+        serverMiddleware: [
+        bodyParser.json(),
+        session({
+        secret: 'super-secret-key',
+        resave: true,
+        saveUninitialized: false,
+        cookie: { maxAge: 60000 }
+        }),
+        '~/api'
+        ],
+        env: {
+        bucketSlug: process.env.BUCKET_SLUG || 'tutorials',
+        readKey: process.env.READ_KEY || 'anyI1DP1bxB5ivjCaJSRC0ZFxB5SJDpfYgrDfR47fw7HIlWYAX',
+        writeKey: process.env.WRITE_KEY || 'J72v1YeK8zZF6n0dI8yhiVTzQy75JASppAQe8XPykiJHW9ARfz'
+        }
+        }
+    </code>
+</pre>
+            <h2>Building our app:</h2>
+            <p>
+                Now we're going to build out our file structure a bit more so that we can organize our vue files. This is what our cosmicapp-tutorials directory should look like:
+            </p>
+<pre>
+    <code>
+        cosmicapp-tutorials
+        |----api
+        |       |----index.js
+        |----assets
+        |       |----css
+        |       |----fonts
+        |       |----images
+        |       |----sass
+        |----layouts
+        |       |----default.vue
+        |----middleware
+        |       |----auth.js
+        |----pages
+        |       |----add
+        |                 |----index.js
+        |       |----articles
+        |                 |----_id.js
+        |       |----blog
+        |                 |----index.js
+        |       |----edit
+        |                 |----_id.js
+        |       |----login
+        |                 |----index.js
+        |       |----profile
+        |                 |----_id.js
+        |       |----register
+        |                 |----index.js
+        |       |----index.vue
+        |----static
+        |----store
+        |----nuxt.config.json
+        |----package.json
+    </code>
+</pre>
+            <p>
+                Now we we will set up our default.vue. Copy and paste the following code into your default.vue file:
+            </p>
+<pre>
+        &lt;template&gt;
+        &lt;div v-bind:class="{ 'is-menu-visible': isMenuVisible}"&gt;
+        &lt;div id="wrapper"&gt;
+        &lt;header id="header"&gt;
+        &lt;div class="inner"&gt;
+        &lt;!-- Logo --&gt;
+        &lt;nuxt-link to="/" class="logo"&gt;
+        &lt;span class="symbol"&gt;&lt;img src="~/assets/images/logo.svg" alt=""/&gt;&lt;/span&gt;
+        &lt;span class="title"&gt;Tutorials&lt;/span&gt;
+        &lt;/nuxt-link&gt;
+        &lt;pre v-bind="$store.state.authUser"&gt;&lt;/pre&gt;
+
+        &lt;!-- Nav --&gt;
+        &lt;nav @click="isMenuVisible = true"&gt;
+        &lt;ul&gt;
+        &lt;li&gt;&lt;a href="#menu"&gt;Menu&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;/nav&gt;
+
+        &lt;/div&gt;
+        &lt;/header&gt;
+        &lt;nuxt/&gt;
+        &lt;footer id="footer"&gt;
+        &lt;div class="inner"&gt;
+        &lt;ul class="copyright"&gt;
+        &lt;li&gt;&lt;img class="cosmic-logo" src="https://cosmicjs.com/images/logo.svg" width="20" height="20"&gt;&lt;a href="https://cosmicjs.com/"&gt;Proudly powered by Cosmic JS&lt;/a&gt;&lt;/li&gt;&lt;li&gt;Copyright: &lt;i class="fa fa-copyright"&gt;&lt;/i&gt; Photography Portfolio App 2017&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;/div&gt;
+        &lt;/footer&gt;
+        &lt;/div&gt;
+        &lt;nav id="menu" @click="isMenuVisible = false"&gt;
+        &lt;div class="inner"&gt;
+        &lt;h2&gt;Menu&lt;/h2&gt;
+        &lt;ul&gt;
+        &lt;li&gt;&lt;nuxt-link to="/"&gt;Home&lt;/nuxt-link&gt;&lt;/li&gt;
+
+        &lt;li v-if="!$store.state.authUser"&gt;&lt;nuxt-link to="/login"&gt;Login&lt;/nuxt-link&gt;&lt;/li&gt;
+        &lt;li v-if="!$store.state.authUser"&gt;&lt;nuxt-link to="/register"&gt;Register&lt;/nuxt-link&gt;&lt;/li&gt;
+
+        &lt;li v-if="$store.state.authUser"&gt;&lt;nuxt-link v-bind:to="'/profile/' + $store.state.authUser.user[0].value"&gt;Profile&lt;/nuxt-link&gt;&lt;/li&gt;
+        &lt;li v-if="$store.state.authUser"&gt;&lt;a href="#" @click="logout()"&gt;Logout&lt;/a&gt;&lt;/li&gt;
+        &lt;/ul&gt;
+        &lt;/div&gt;
+        &lt;a class="close" @click="isMenuVisible = false" href="#menu"&gt;Close&lt;/a&gt;
+        &lt;/nav&gt;
+        &lt;/div&gt;
+
+        &lt;/template&gt;
+
+        &lt;script&gt;
+        export default {
+
+        data () {
+        return {
+        isMenuVisible: false
+        }
+        },
+        methods: {
+        async logout () {
+        await this.$store.dispatch('logout')
+        }
+        }
+        }
+        &lt;/script&gt;
+
+        &lt;style src="~/assets/css/main.css"&gt;&lt;/style&gt;
+</pre>
+            <p>
+                After that we can create index.vue. Copy and paste the following code into your index.vue file:
+            </p>
+<pre>
+    <code>
+        &lt;template&gt;
+        &lt;div id="main"&gt;
+        &lt;div class="inner"&gt;
+        &lt;header&gt;
+        &lt;h1&gt;You are browsing the best resource &lt;br&gt;
+        for Online Education.&lt;/h1&gt;
+        &lt;p&gt;Just clear crisp and to the point content, nothing else.&lt;/p&gt;
+        &lt;/header&gt;
+        &lt;section class="tiles"&gt;
+        &lt;article v-bind:class="'style' + (index + 1)" v-for="(article, index) in articles"&gt;
+        &lt;span class="image"&gt;
+        &lt;img v-if="article.metadata" :src="article.metadata.image.url" alt=""/&gt;
+        &lt;/span&gt;
+        &lt;nuxt-link v-bind:to="'/articles/' + article.slug" class="logo"&gt;
+        &lt;h2&gt;{{article.title}}&lt;/h2&gt;
+        &lt;div class="content" v-html="article.content"&gt;&lt;/div&gt;
+        &lt;/nuxt-link&gt;
+        &lt;/article&gt;
+        &lt;/section&gt;
+        &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;/template&gt;
+
+        &lt;script&gt;
+        import axios from 'axios'
+
+        export default {
+
+        asyncData () {
+        return axios.get(`https://api.cosmicjs.com/v1/tutorials/object-type/articles?read_key=${process.env.readKey}`)
+        .then((res) =&gt; {
+        return { articles: res.data.objects }
+        })
+        },
+        head () {
+        return {
+        title: 'Tutorials'
+        }
+        }
+        }
+        &lt;/script&gt;
+    </code>
+</pre>
+            <p>
+                Now we we will set up our store/index.vue. Copy and paste the following code into your store/index.vue file:
+            </p>
+<pre>
+import axios from 'axios';
+var sha1 = require('sha1');
+
+export const state = () => ({
+    authUser: null
+})
+
+export const mutations = {
+    SET_USER: function (state, user) {
+        state.authUser = user
+    }
+}
+
+export const actions = {
+    // nuxtServerInit is called by Nuxt.js before server-rendering every page
+    nuxtServerInit ({ commit }, { req }) {
+        if (req.session && req.session.authUser) {
+            commit('SET_USER', req.session.authUser)
+        }
+    },
+    async login ({ commit }, { username, password }) {
+        axios.get('https://api.cosmicjs.com/v1/' + process.env.bucketSlug + '/object-type/users/search', {
+                params: {
+                    metafield_key: 'username',
+                    metafield_value_has: username,
+                    limit: 1,
+                    read_key: process.env.readKey
+                }
+            })
+            .then(function (response) {
+                if (response.data.status !== 'empty') {
+                    axios.get('https://api.cosmicjs.com/v1/' + process.env.bucketSlug + '/object-type/users/search', {
+                            params: {
+                                metafield_key: 'password',
+                                metafield_value: sha1(password),
+                                limit: 1,
+                                read_key: process.env.readKey
+                            }
+                        })
+                        .then(function (response) {
+                            if (response.data.status !== 'empty') {
+                                axios.post('/api/saveSession', response.data.objects[0])
+                                    .then(function (response) {
+                                        commit('SET_USER', response.data);
+                                        window.location.href = '/profile/' + username;
+                                });
+                            }
+                        })
+
+                }
+            })
+    },
+    async register ({ commit }, { username, password }) {
+        axios.post('https://api.cosmicjs.com/v1/' + process.env.bucketSlug + '/add-object', {
+                write_key: process.env.writeKey,
+
+                title: username,
+                type_slug: 'users',
+                slug: username,
+                metafields: [
+                    {
+                        key: "username",
+                        type: "text",
+                        value: username
+                    },
+                    {
+                        key: "password",
+                        type: "text",
+                        value: sha1(password)
+                    }
+                ]
+            })
+            .then(function (response) {
+                axios.post('/api/saveSession', response.data.object)
+                    .then(function (response) {
+                        commit('SET_USER', response.data);
+                        window.location.href = '/profile/' + username;
+                    });
+            });
+
+    },
+    async logout ({ commit }) {
+        await axios.post('/api/logout')
+        window.location.href = '/login';
+        commit('SET_USER', null)
+    }
+
+}
+</pre>
+            <p>
+                Now we we will set up our auth.js. Copy and paste the following code into your middleware/auth.vue file:
+            </p>
+<pre>
+    export default function ({ store, error }) {
+    if (!store.state.authUser) {
+        error({
+            message: 'You are not connected',
+            statusCode: 403
+        })
+    }
+}
+</pre>
+            <h2>
+                What's going on here:
+            </h2>
+            <ol>
+                <li>We created default layouts.</li>
+                <li>We created store/index.js for login, register and sessions.</li>
+                <li>We created middleware/auth.js for checking that user logged in.</li>
+            </ol>
+            <h2>Conclusion:</h2>
+            <p>
+                We were able to consume the Cosmic JS API with our actions and dispatcher functions.
+                I hope you enjoyed this tutorial as much as I did,
+                if you have any questions <a href="https://twitter.com/cosmic_js">reach out to us on Twitter</a>
+                and <a href="https://cosmicjs.com/community">join our community on Slack</a>.
+            </p>
+            <br>
+        </div>
+    </div>
+    </body>
+</html>
