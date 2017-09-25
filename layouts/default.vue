@@ -23,7 +23,7 @@
      <footer id="footer">
        <div class="inner">
          <ul class="copyright">
-           <li><img class="cosmic-logo" src="https://cosmicjs.com/images/logo.svg" width="20" height="20"><a href="https://cosmicjs.com/">Proudly powered by Cosmic JS</a></li><li>Copyright: <i class="fa fa-copyright"></i> Photography Portfolio App 2017</li>
+           <li><img class="cosmic-logo" src="https://cosmicjs.com/images/logo.svg" width="20" height="20"><a href="https://cosmicjs.com/">Proudly powered by Cosmic JS</a></li><li>Copyright: <i class="fa fa-copyright"></i> Tutorials App 2017</li>
          </ul>
        </div>
      </footer>
