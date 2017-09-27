@@ -1,5 +1,6 @@
-# cosmicapp-tutorials
-
+# Tutorials
+An education platform that allows users to register, login and add tutorials. 
+![Tutorials](https://cosmicjs.com/uploads/81983780-a3c9-11e7-89ef-3ff92a216c25-tutorials-2.png)
 > Nuxt.js project
 
 ## Build Setup
