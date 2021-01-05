@@ -1,6 +1,7 @@
-# cosmicapp-tutorials
-
-> Nuxt.js project
+# Tutorials App
+An tutorials app that allows users to register, login and add tutorials. Built using [Nuxt.js](https://nuxtjs.org/) and [Cosmic JS](https://cosmicjs.com).
+![Tutorials](https://cosmicjs.com/uploads/81983780-a3c9-11e7-89ef-3ff92a216c25-tutorials-2.png)
+#### [View Demo](https://cosmicjs.com/apps/tutorials-app/demo)
 
 ## Build Setup
 
